@@ -4,38 +4,46 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-#define handle_error(msg,val) \
-   do { perror(msg); return(val); } while (0)
+#include <err.h>
 
 char *slurp(const char *filename) {
     int fd;
     FILE *stream;
     struct stat sb;
     size_t length;
-    char *ret;
+    char *ret = NULL;
 
     fd = open(filename, O_RDONLY);
     if (-1 == fd)
-        handle_error("open", NULL);
+       goto ERROR;
 
     if (-1 == fstat(fd, &sb))
-        handle_error("fstat", NULL);
+        goto ERROR;
 
     length = sb.st_size;
     ret = calloc(length+1, sizeof(char));
     stream = fdopen(fd, "r");
 
-    if (length != fread(ret, sizeof(char), length, stream))
-        handle_error("fread", NULL);
+    if (length != fread(ret, sizeof(char), length, stream)) {
+        free(ret);
+        ret = NULL;
+        fclose(stream);
+        goto ERROR;
+    }
 
     fclose(stream);
 
+    goto OK;
+  ERROR:
+  OK:
     return ret;
 }
 
 GLuint load_shader(GLenum shader_type, const char *filename) {
     char *source = slurp(filename);
+    if (NULL == source) {
+        err(255, "Problem reading file %s", filename);
+    }
 
 
     GLuint shader = glCreateShader(shader_type);
