@@ -7,23 +7,9 @@
 
 GLuint glprog;
 
-const char *vert_shader_source =
-	"#version 330\n"
-	"layout(location = 0) in vec4 position;\n"
-	"void main()\n"
-	"{\n"
-	"   gl_Position = position;\n"
-	"}\n"
-;
+const char *vert_shader_file = "shaders/basic.vert";
 
-const char *frag_shader_source = 
-	"#version 330\n"
-	"out vec4 outputColor;\n"
-	"void main()\n"
-	"{\n"
-	"   outputColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
-	"}\n"
-;
+const char *frag_shader_file = "shaders/basic.frag";
 
 const float vert_pos[] = {
 	0.75f, 0.75f, 0.0f, 1.0f,
@@ -57,8 +43,8 @@ void resize(int w, int h) {
 
 void init() {
     GLuint shaders[2];
-    shaders[0] = create_shader(GL_VERTEX_SHADER, vert_shader_source);
-    shaders[1] = create_shader(GL_FRAGMENT_SHADER, frag_shader_source);
+    shaders[0] = load_shader(GL_VERTEX_SHADER, vert_shader_file);
+    shaders[1] = load_shader(GL_FRAGMENT_SHADER, frag_shader_file);
 
     glprog = create_program(2, shaders);
 
