@@ -1,0 +1,29 @@
+{
+   nvidia-bullshit
+   Memcheck:Param
+   ioctl(generic)
+   fun:ioctl
+   obj:/usr/lib64/nvidia/libnvidia-glcore.so.*
+   ...
+}
+{
+   nvidia-bullshit
+   Memcheck:Cond
+   obj:/usr/lib64/nvidia/libnvidia-glcore.so.275.09.07
+}
+{
+   glutInit-leaks
+   Memcheck:Leak
+   fun:malloc
+   ...
+   fun:glutInit
+   fun:main
+}
+{
+   nvidia-bullshit-leaks
+   Memcheck:Leak
+   ...
+   obj:/usr/lib64/nvidia/libGL.so.275.09.07
+   ...
+}
+
