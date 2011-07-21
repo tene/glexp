@@ -72,7 +72,12 @@ void render() {
     glBindVertexArray(vao);
 
     glUniform3f(offset_unif, 1.5f, 0.5f, 0.0f);
+    glDrawElements(GL_TRIANGLES, ARRAY_COUNT(index_data), GL_UNSIGNED_SHORT, 0);
 
+    glUniform3f(offset_unif, -1.5f, 0.5f, 0.0f);
+    glDrawElements(GL_TRIANGLES, ARRAY_COUNT(index_data), GL_UNSIGNED_SHORT, 0);
+
+    glUniform3f(offset_unif, -1.2f, 0.2f, -0.3f);
     glDrawElements(GL_TRIANGLES, ARRAY_COUNT(index_data), GL_UNSIGNED_SHORT, 0);
 
     glBindVertexArray(0);
@@ -135,6 +140,11 @@ void init() {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CW);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LEQUAL);
+    glDepthRange(0.0f, 1.0f);
 }
 
 int main(int argc, char **argv) {
