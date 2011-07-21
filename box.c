@@ -6,114 +6,58 @@
 #include "utils.c"
 #include "glmath.h"
 
+#define ARRAY_COUNT( array ) (sizeof( array ) / (sizeof( array[0] ) * (sizeof( array ) != sizeof(void*) || sizeof( array[0] ) <= sizeof(void*))))
+
 GLuint glprog;
 
 const char *vert_shader_file = "shaders/persp.vert";
 
 const char *frag_shader_file = "shaders/basic.frag";
 
-const float vert_data[] = {
-    0.25f,  0.25f, -1.25f, 1.0f,
-	 0.25f, -0.25f, -1.25f, 1.0f,
-	-0.25f,  0.25f, -1.25f, 1.0f,
+const GLshort index_data[] = {
+    0, 2, 1,
+    2, 3, 1,
 
-	 0.25f, -0.25f, -1.25f, 1.0f,
-	-0.25f, -0.25f, -1.25f, 1.0f,
-	-0.25f,  0.25f, -1.25f, 1.0f,
+    1, 3, 7,
+    1, 7, 5,
 
-	 0.25f,  0.25f, -2.75f, 1.0f,
-	-0.25f,  0.25f, -2.75f, 1.0f,
-	 0.25f, -0.25f, -2.75f, 1.0f,
+    3, 2, 6,
+    3, 6, 7,
 
-	 0.25f, -0.25f, -2.75f, 1.0f,
-	-0.25f,  0.25f, -2.75f, 1.0f,
-	-0.25f, -0.25f, -2.75f, 1.0f,
+    7, 4, 5,
+    7, 6, 4,
 
-	-0.25f,  0.25f, -1.25f, 1.0f,
-	-0.25f, -0.25f, -1.25f, 1.0f,
-	-0.25f, -0.25f, -2.75f, 1.0f,
+    1, 4, 0,
+    1, 5, 4,
 
-	-0.25f,  0.25f, -1.25f, 1.0f,
-	-0.25f, -0.25f, -2.75f, 1.0f,
-	-0.25f,  0.25f, -2.75f, 1.0f,
+    0, 4, 2,
+    4, 6, 2,
+};
 
-	 0.25f,  0.25f, -1.25f, 1.0f,
-	 0.25f, -0.25f, -2.75f, 1.0f,
-	 0.25f, -0.25f, -1.25f, 1.0f,
-
-	 0.25f,  0.25f, -1.25f, 1.0f,
-	 0.25f,  0.25f, -2.75f, 1.0f,
-	 0.25f, -0.25f, -2.75f, 1.0f,
-
-	 0.25f,  0.25f, -2.75f, 1.0f,
-	 0.25f,  0.25f, -1.25f, 1.0f,
-	-0.25f,  0.25f, -1.25f, 1.0f,
-
-	 0.25f,  0.25f, -2.75f, 1.0f,
-	-0.25f,  0.25f, -1.25f, 1.0f,
-	-0.25f,  0.25f, -2.75f, 1.0f,
-
-	 0.25f, -0.25f, -2.75f, 1.0f,
-	-0.25f, -0.25f, -1.25f, 1.0f,
-	 0.25f, -0.25f, -1.25f, 1.0f,
-
-	 0.25f, -0.25f, -2.75f, 1.0f,
-	-0.25f, -0.25f, -2.75f, 1.0f,
-	-0.25f, -0.25f, -1.25f, 1.0f,
+int vert_count= 8;
+const GLfloat vert_data[] = {
+    0.25f, 0.25f,-1.25f, // 0 URF
+   -0.25f, 0.25f,-1.25f, // 1 ULF
+    0.25f,-0.25f,-1.25f, // 2 LRF
+   -0.25f,-0.25f,-1.25f, // 3 LLF
+    0.25f, 0.25f,-2.75f, // 4 URB
+   -0.25f, 0.25f,-2.75f, // 5 ULB
+    0.25f,-0.25f,-2.75f, // 6 LRB
+   -0.25f,-0.25f,-2.75f, // 7 LLB
 
 
-
-
-	0.0f, 0.0f, 1.0f, 1.0f,
-	0.0f, 0.0f, 1.0f, 1.0f,
-	0.0f, 0.0f, 1.0f, 1.0f,
-
-	0.0f, 0.0f, 1.0f, 1.0f,
-	0.0f, 0.0f, 1.0f, 1.0f,
-	0.0f, 0.0f, 1.0f, 1.0f,
-
-	0.8f, 0.8f, 0.8f, 1.0f,
-	0.8f, 0.8f, 0.8f, 1.0f,
-	0.8f, 0.8f, 0.8f, 1.0f,
-
-	0.8f, 0.8f, 0.8f, 1.0f,
-	0.8f, 0.8f, 0.8f, 1.0f,
-	0.8f, 0.8f, 0.8f, 1.0f,
-
-	0.0f, 1.0f, 0.0f, 1.0f,
-	0.0f, 1.0f, 0.0f, 1.0f,
-	0.0f, 1.0f, 0.0f, 1.0f,
-
-	0.0f, 1.0f, 0.0f, 1.0f,
-	0.0f, 1.0f, 0.0f, 1.0f,
-	0.0f, 1.0f, 0.0f, 1.0f,
-
-	0.5f, 0.5f, 0.0f, 1.0f,
-	0.5f, 0.5f, 0.0f, 1.0f,
-	0.5f, 0.5f, 0.0f, 1.0f,
-
-	0.5f, 0.5f, 0.0f, 1.0f,
-	0.5f, 0.5f, 0.0f, 1.0f,
-	0.5f, 0.5f, 0.0f, 1.0f,
-
-	1.0f, 0.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 0.0f, 1.0f,
-
-	1.0f, 0.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 0.0f, 1.0f,
-	1.0f, 0.0f, 0.0f, 1.0f,
-
-	0.0f, 1.0f, 1.0f, 1.0f,
-	0.0f, 1.0f, 1.0f, 1.0f,
-	0.0f, 1.0f, 1.0f, 1.0f,
-
-	0.0f, 1.0f, 1.0f, 1.0f,
-	0.0f, 1.0f, 1.0f, 1.0f,
-	0.0f, 1.0f, 1.0f, 1.0f,
+	0.2f, 0.2f, 0.2f, 1.0f,
+	1.0f, 0.2f, 0.2f, 1.0f,
+	0.2f, 1.0f, 0.2f, 1.0f,
+	1.0f, 1.0f, 0.2f, 1.0f,
+	0.2f, 0.2f, 1.0f, 1.0f,
+	1.0f, 0.2f, 1.0f, 1.0f,
+	0.2f, 1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f, 1.0f,
 };
 
 GLuint posbuf;
+GLuint idxbuf;
 GLuint vao;
 GLint offset_unif;
 GLint perspec_unif;
@@ -125,19 +69,13 @@ void render() {
 
     glUseProgram(glprog);
 
-    glUniform2f(offset_unif, 1.5f, 0.5f);
+    glBindVertexArray(vao);
 
-    size_t color_index = sizeof(vert_data) / 2;
-    glBindBuffer(GL_ARRAY_BUFFER, posbuf);
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void *)color_index);
+    glUniform3f(offset_unif, 1.5f, 0.5f, 0.0f);
 
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
+    glDrawElements(GL_TRIANGLES, ARRAY_COUNT(index_data), GL_UNSIGNED_SHORT, 0);
+
+    glBindVertexArray(0);
     glUseProgram(0);
 
     glutSwapBuffers();
@@ -176,8 +114,23 @@ void init() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vert_data), vert_data, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    glGenBuffers(1, &idxbuf);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idxbuf);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_data), index_data, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
+
+    size_t color_index = sizeof(float) * 3 * vert_count;
+    glBindBuffer(GL_ARRAY_BUFFER, posbuf);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void *)color_index);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idxbuf);
+
+    glBindVertexArray(0);
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
