@@ -141,7 +141,7 @@ void render() {
     glUseProgram(0);
 
     glutSwapBuffers();
-    glutPostRedisplay();
+    //glutPostRedisplay();
 }
 
 void setup_perspective() {
@@ -158,6 +158,7 @@ void resize(int w, int h) {
     aspect_ratio = (float)h / (float)w;
     setup_perspective();
     glViewport(0, 0, w, h);
+    //glutPostRedisplay();
 }
 
 void init() {
