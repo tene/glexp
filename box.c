@@ -117,6 +117,7 @@ GLuint posbuf;
 GLuint vao;
 GLint offset_unif;
 GLint perspec_unif;
+float aspect_ratio = 1;
 
 void render() {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -124,7 +125,7 @@ void render() {
 
     glUseProgram(glprog);
 
-    glUniform2f(offset_unif, 0.5f, 0.5f);
+    glUniform2f(offset_unif, 1.5f, 0.5f);
 
     size_t color_index = sizeof(vert_data) / 2;
     glBindBuffer(GL_ARRAY_BUFFER, posbuf);
@@ -143,8 +144,19 @@ void render() {
     glutPostRedisplay();
 }
 
+void setup_perspective() {
+    mat44f perspec;
+    perspective_matrix(1.0f, 0.5f, 3.0f, aspect_ratio, perspec);
+
+    glUseProgram(glprog);
+    glUniformMatrix4fv(perspec_unif, 1, GL_TRUE, (GLfloat *)perspec);
+    glUseProgram(0);
+}
+
 void resize(int w, int h) {
     h = h ? h : 1;
+    aspect_ratio = (float)h / (float)w;
+    setup_perspective();
     glViewport(0, 0, w, h);
 }
 
@@ -156,15 +168,7 @@ void init() {
     glprog = create_program(2, shaders);
     offset_unif = glGetUniformLocation(glprog, "offset");
     perspec_unif = glGetUniformLocation(glprog, "perspective");
-    mat44f perspec;
-    perspective_matrix(1.0f, 0.5f, 3.0f, perspec);
-    for (int i = 0; i<16; i++) {
-        printf("%2f\n", ((float *)perspec)[i]);
-    }
-
-    glUseProgram(glprog);
-    glUniformMatrix4fv(perspec_unif, 1, GL_TRUE, (GLfloat *)perspec);
-    glUseProgram(0);
+    setup_perspective();
 
     glGenBuffers(1, &posbuf);
     glBindBuffer(GL_ARRAY_BUFFER, posbuf);
@@ -183,7 +187,7 @@ int main(int argc, char **argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode( GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB );
 
-    glutCreateWindow("tritest");
+    glutCreateWindow("boxtest");
     glutDisplayFunc(render);
     //glutIdleFunc(render);
     glutReshapeFunc(resize);
