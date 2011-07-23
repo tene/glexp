@@ -1,6 +1,7 @@
 CFLAGS    = -ggdb -Wall -std=gnu99
-CBLASARGS = -L/usr/lib64/atlas -lcblas
-LINKARGS  = $(LDFLAGS) $(LD_LOAD_FLAGS) -lGL -lGLU -lGLEW -lglut $(CBLASARGS)
+CBLASARGS = -L/usr/lib64/atlas -lcblas -lm
+GLLINKARGS= -lGL -lGLU -lGLEW -lglut 
+LINKARGS  = $(LDFLAGS) $(LD_LOAD_FLAGS) $(GLLINKARGS) $(CBLASARGS)
 VALGRIND  = valgrind --gen-suppressions=all --suppressions=support/opengl.supp --track-origins=yes --leak-check=full --show-reachable=yes
 
 all: tri box

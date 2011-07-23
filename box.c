@@ -10,7 +10,7 @@
 
 GLuint glprog;
 
-const char *vert_shader_file = "shaders/persp.vert";
+const char *vert_shader_file = "shaders/perspcamera.vert";
 
 const char *frag_shader_file = "shaders/basic.frag";
 
@@ -36,14 +36,14 @@ const GLshort index_data[] = {
 
 int vert_count= 8;
 const GLfloat vert_data[] = {
-    0.25f, 0.25f,-1.25f, // 0 URF
-   -0.25f, 0.25f,-1.25f, // 1 ULF
-    0.25f,-0.25f,-1.25f, // 2 LRF
-   -0.25f,-0.25f,-1.25f, // 3 LLF
-    0.25f, 0.25f,-2.75f, // 4 URB
-   -0.25f, 0.25f,-2.75f, // 5 ULB
-    0.25f,-0.25f,-2.75f, // 6 LRB
-   -0.25f,-0.25f,-2.75f, // 7 LLB
+    0.25f, 0.25f, 0.25f, // 0 URF
+   -0.25f, 0.25f, 0.25f, // 1 ULF
+    0.25f,-0.25f, 0.25f, // 2 LRF
+   -0.25f,-0.25f, 0.25f, // 3 LLF
+    0.25f, 0.25f,-0.25f, // 4 URB
+   -0.25f, 0.25f,-0.25f, // 5 ULB
+    0.25f,-0.25f,-0.25f, // 6 LRB
+   -0.25f,-0.25f,-0.25f, // 7 LLB
 
 
 	0.2f, 0.2f, 0.2f, 1.0f,
@@ -60,8 +60,20 @@ GLuint posbuf;
 GLuint idxbuf;
 GLuint vao;
 GLint offset_unif;
+GLint camera_unif;
 GLint perspec_unif;
 float aspect_ratio = 1;
+
+char world[8][8][8] = {
+    { {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0}, {1,1,1,1,1,1,1,1}, {1,1,1,1,1,1,1,1}, {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0} },
+    { {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0}, {0,1,1,1,1,1,1,0}, {1,1,1,1,1,1,1,1}, {1,1,1,1,1,1,1,1}, {0,1,1,1,1,1,1,0}, {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0} },
+    { {0,0,0,0,0,0,0,0}, {0,0,1,1,1,1,0,0}, {0,1,1,1,1,1,1,0}, {1,1,1,1,1,1,1,1}, {1,1,1,1,1,1,1,1}, {0,1,1,1,1,1,1,0}, {0,0,1,1,1,1,0,0}, {0,0,0,0,0,0,0,0} },
+    { {0,0,0,1,1,0,0,0}, {0,0,1,1,1,1,0,0}, {0,1,1,1,1,1,1,0}, {1,1,1,1,1,1,1,1}, {1,1,1,1,1,1,1,1}, {0,1,1,1,1,1,1,0}, {0,0,1,1,1,1,0,0}, {0,0,0,1,1,0,0,0} },
+    { {0,0,0,1,1,0,0,0}, {0,0,1,1,1,1,0,0}, {0,1,1,1,1,1,1,0}, {1,1,1,1,1,1,1,1}, {1,1,1,1,1,1,1,1}, {0,1,1,1,1,1,1,0}, {0,0,1,1,1,1,0,0}, {0,0,0,1,1,0,0,0} },
+    { {0,0,0,0,0,0,0,0}, {0,0,1,1,1,1,0,0}, {0,1,1,1,1,1,1,0}, {1,1,1,1,1,1,1,1}, {1,1,1,1,1,1,1,1}, {0,1,1,1,1,1,1,0}, {0,0,1,1,1,1,0,0}, {0,0,0,0,0,0,0,0} },
+    { {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0}, {0,1,1,1,1,1,1,0}, {1,1,1,1,1,1,1,1}, {1,1,1,1,1,1,1,1}, {0,1,1,1,1,1,1,0}, {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0} },
+    { {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0}, {1,1,1,1,1,1,1,1}, {1,1,1,1,1,1,1,1}, {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0} },
+};
 
 void render() {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -72,8 +84,16 @@ void render() {
 
     glBindVertexArray(vao);
 
-    glUniform3f(offset_unif, 1.5f, 0.5f, 0.0f);
-    glDrawElements(GL_TRIANGLES, ARRAY_COUNT(index_data), GL_UNSIGNED_SHORT, 0);
+    for (int x=0; x<8; x++) {
+        for (int y=0; y<8; y++) {
+            for (int z=0; z<8; z++) {
+                if (world[x][y][z] == 1) {
+                    glUniform3f(offset_unif, x/2.0f, y/2.0f, z/2.0f);
+                    glDrawElements(GL_TRIANGLES, ARRAY_COUNT(index_data), GL_UNSIGNED_SHORT, 0);
+                }
+            }
+        }
+    }
 
     glUniform3f(offset_unif, -1.5f, 0.5f, 0.0f);
     glDrawElements(GL_TRIANGLES, ARRAY_COUNT(index_data), GL_UNSIGNED_SHORT, 0);
@@ -90,10 +110,19 @@ void render() {
 
 void setup_perspective() {
     mat44f perspec;
-    perspective_matrix(1.0f, 0.5f, 3.0f, aspect_ratio, perspec);
+    perspective_matrix(90.0f, 0.5f, 3.0f, aspect_ratio, perspec);
 
     glUseProgram(glprog);
     glUniformMatrix4fv(perspec_unif, 1, GL_TRUE, (GLfloat *)perspec);
+    glUseProgram(0);
+}
+
+void setup_camera() {
+    mat44f camera;
+    translation_matrix(-3.0f, -4.0f, -6.5f, camera);
+
+    glUseProgram(glprog);
+    glUniformMatrix4fv(camera_unif, 1, GL_TRUE, (GLfloat *)camera);
     glUseProgram(0);
 }
 
@@ -112,8 +141,10 @@ void init() {
 
     glprog = create_program(2, shaders);
     offset_unif = glGetUniformLocation(glprog, "offset");
+    camera_unif = glGetUniformLocation(glprog, "camera");
     perspec_unif = glGetUniformLocation(glprog, "perspective");
     setup_perspective();
+    setup_camera();
 
     glGenBuffers(1, &posbuf);
     glBindBuffer(GL_ARRAY_BUFFER, posbuf);
