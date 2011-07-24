@@ -112,7 +112,7 @@ void render() {
 
 void setup_perspective() {
     mat44f perspec;
-    perspective_matrix(90.0f, 0.5f, 100.0f, aspect_ratio, perspec);
+    perspective_matrix(75.0f, 0.5f, 100.0f, aspect_ratio, perspec);
 
     glUseProgram(glprog);
     glUniformMatrix4fv(perspec_unif, 1, GL_TRUE, (GLfloat *)perspec);
@@ -121,10 +121,18 @@ void setup_perspective() {
 
 void setup_camera() {
     mat44f camera;
-    translation_matrix(position[0], position[1], position[2], camera);
+    mat44f pos;
+    mat44f rot;
+    mat44f tmp;
+    //mat44f total;
+    translation_matrix(0, 1, 0, camera);
+    translation_matrix(position[0], position[1], position[2], pos);
+    rotation_matrix(bearing[0], bearing[1], rot);
+    mmmul4f(rot, pos, tmp);
+    //mmmul4f(tmp, camera, total);
 
     glUseProgram(glprog);
-    glUniformMatrix4fv(camera_unif, 1, GL_TRUE, (GLfloat *)camera);
+    glUniformMatrix4fv(camera_unif, 1, GL_TRUE, (GLfloat *)tmp);
     glUseProgram(0);
 }
 
@@ -194,6 +202,11 @@ void keyboard(unsigned char key, int x, int y)
         case 'd': position[0] -= 1; break;
         case 'r': position[1] -= 1; break;
         case 'f': position[1] += 1; break;
+
+        case 'q': bearing[0] += 0.1; break;
+        case 'e': bearing[0] -= 0.1; break;
+        case 'g': bearing[1] -= 0.1; break;
+        case 't': bearing[1] += 0.1; break;
     }
     setup_camera();
     glutPostRedisplay();
