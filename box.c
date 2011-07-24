@@ -62,6 +62,8 @@ GLuint vao;
 GLint offset_unif;
 GLint camera_unif;
 GLint perspec_unif;
+vec2f bearing = {0, 0};
+vec3f position = {-3.0f, -4.0f, -6.5f};
 float aspect_ratio = 1;
 
 char world[8][8][8] = {
@@ -110,7 +112,7 @@ void render() {
 
 void setup_perspective() {
     mat44f perspec;
-    perspective_matrix(90.0f, 0.5f, 3.0f, aspect_ratio, perspec);
+    perspective_matrix(90.0f, 0.5f, 100.0f, aspect_ratio, perspec);
 
     glUseProgram(glprog);
     glUniformMatrix4fv(perspec_unif, 1, GL_TRUE, (GLfloat *)perspec);
@@ -119,7 +121,7 @@ void setup_perspective() {
 
 void setup_camera() {
     mat44f camera;
-    translation_matrix(-3.0f, -4.0f, -6.5f, camera);
+    translation_matrix(position[0], position[1], position[2], camera);
 
     glUseProgram(glprog);
     glUniformMatrix4fv(camera_unif, 1, GL_TRUE, (GLfloat *)camera);
@@ -179,6 +181,24 @@ void init() {
     glDepthRange(0.0f, 1.0f);
 }
 
+void keyboard(unsigned char key, int x, int y)
+{
+    switch (key) {
+        case 27:
+            //cleanup();
+            glutLeaveMainLoop();
+            break;
+        case 'w': position[2] += 1; break;
+        case 's': position[2] -= 1; break;
+        case 'a': position[0] += 1; break;
+        case 'd': position[0] -= 1; break;
+        case 'r': position[1] -= 1; break;
+        case 'f': position[1] += 1; break;
+    }
+    setup_camera();
+    glutPostRedisplay();
+}
+
 int main(int argc, char **argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode( GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB );
@@ -187,6 +207,7 @@ int main(int argc, char **argv) {
     glutDisplayFunc(render);
     //glutIdleFunc(render);
     glutReshapeFunc(resize);
+    glutKeyboardFunc(keyboard);
 
     glewInit();
     if (!glewIsSupported("GL_VERSION_2_0")) {

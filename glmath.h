@@ -2,6 +2,8 @@
 #include <GL/glew.h>
 #include <cblas.h>
 #include <math.h>
+typedef GLfloat vec2f[2];
+typedef GLfloat vec3f[3];
 typedef GLfloat vec4f[4];
 typedef GLfloat mat44f[4][4];
 
